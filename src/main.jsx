@@ -1,11 +1,226 @@
-import React,{useState} from 'react';import{createRoot}from'react-dom/client';import{Anchor,Search,Bell,UserRound,House,Film,BookOpen,Gamepad2,Info,ShieldCheck,Mail,PlusCircle,ExternalLink,Check,X,Clock3,Menu,ArrowRight}from'lucide-react';import'./style.css';
-const initial=[{id:1,title:'MDN Web Docs',channel:'Study Dock',category:'Learning',desc:'Documentation and guides for web development.',url:'https://developer.mozilla.org/',status:'approved'},{id:2,title:'freeCodeCamp',channel:'Study Dock',category:'Learning',desc:'Free programming lessons and practice projects.',url:'https://www.freecodecamp.org/',status:'approved'},{id:3,title:'Blender',channel:'Game Dock',category:'Tools',desc:'Free and open-source 3D creation software.',url:'https://www.blender.org/',status:'approved'},{id:4,title:'Big Buck Bunny',channel:'Movie Dock',category:'Animation',desc:'An open movie project from the Blender Foundation.',url:'https://peach.blender.org/',status:'approved'},{id:5,title:'Creative Commons Search',channel:'Movie Dock',category:'Tools',desc:'Explore openly licensed creative works.',url:'https://search.creativecommons.org/',status:'approved'},{id:6,title:'Godot Engine',channel:'Game Dock',category:'Tools',desc:'Official open-source game engine resources.',url:'https://godotengine.org/',status:'approved'}];
-const chans=[['Movie Dock','Discover movies, documentaries and trailers from authorized sources.',Film],['Study Dock','Find notes, learning materials and documentation.',BookOpen],['Game Dock','Explore games, game tools, mods and demos.',Gamepad2]];
-function App(){const[page,P]=useState('Home'),[ch,C]=useState('Movie Dock'),[q,Q]=useState(''),[f,F]=useState('All'),[items,I]=useState(initial),[msg,M]=useState(''),[form,S]=useState({channel:'Movie Dock',title:'',url:'',desc:''}),[admin,A]=useState('pending');const go=(p,c)=>{P(p);if(c)C(c);Q('');F('All');M('')};const shown=items.filter(x=>x.status==='approved'&&(page==='Home'||x.channel===ch)&&(f==='All'||x.category===f)&&(`${x.title} ${x.desc} ${x.category}`).toLowerCase().includes(q.toLowerCase()));function submit(e){e.preventDefault();try{let u=new URL(form.url);if(!['https:','http:'].includes(u.protocol))throw 0;I([{...form,id:Date.now(),url:u.href,domain:u.hostname,status:'pending',desc:form.desc},...items]);S({...form,title:'',url:'',desc:''});M('Submitted to the demo review queue. It is not public until approved.')}catch{M('Please enter a valid http or https URL.')}}function decide(id,status){I(items.map(x=>x.id===id?{...x,status}:x));M('Demo status updated: '+status)}return <div className="app"><aside className="side"><button className="brand" onClick={()=>go('Home')}><Anchor/> <span><b>Digital Dock</b><small>Your central hub for digital</small></span></button><label>EXPLORE</label>{[['Home',House],['Movie Dock',Film],['Study Dock',BookOpen],['Game Dock',Gamepad2]].map(([n,Icon])=><button className={'nav '+((page===n||(page==='Channel'&&ch===n))?'active':'')} onClick={()=>n==='Home'?go('Home'):go('Channel',n)}><Icon size={18}/>{n==='Movie Dock'?'Movies':n==='Study Dock'?'Study Material':n==='Game Dock'?'Games':n}</button>)}<hr/><label>INFORMATION</label><button className="nav" onClick={()=>go('About')}><Info size={18}/>About</button><button className="nav" onClick={()=>go('Rules')}><ShieldCheck size={18}/>Rules</button><button className="nav" onClick={()=>go('Contact')}><Mail size={18}/>Contact</button><div className="sidebottom"><small>◉ Anonymous browsing</small><button className="outline" onClick={()=>go('Submit')}><PlusCircle size={16}/> Submit resource</button><button className="adminlink" onClick={()=>go('Admin')}>Admin moderation dashboard</button></div></aside><main><header><button className="mobile" onClick={()=>document.querySelector('.side').classList.toggle('show')}><Menu/></button><span>{page==='Channel'?ch:page==='Admin'?'Admin moderation':page}</span><div><Bell size={18}/><UserRound size={18}/> Anonymous</div></header>{msg&&<div className="notice">{msg}<button onClick={()=>M('')}>×</button></div>}
-{page==='Home'&&<div className="content"><section className="hero"><small>ONE PLACE. MANY POSSIBILITIES.</small><h1>Your central hub for<br/><em>digital resources.</em></h1><p>Discover useful learning materials, media and tools from their original sources.</p><form className="search" onSubmit={e=>e.preventDefault()}><Search/><input value={q} onChange={e=>Q(e.target.value)} placeholder="Search resources, topics or tools..."/><button>Search</button></form><small className="safety"><ShieldCheck size={15}/> Links point to original sources. Check licensing and safety.</small></section><section><div className="heading"><div><small>FIND YOUR SPACE</small><h2>Choose your Dock</h2><p>Browse resources by what you want to do.</p></div></div><div className="channels">{chans.map(([n,d,Icon],i)=><button className="channel" onClick={()=>go('Channel',n)}><span className={'bigicon i'+i}><Icon size={26}/></span><h3>{n}</h3><p>{d}</p><b>Explore channel <ArrowRight size={15}/></b></button>)}</div></section><section><div className="heading"><div><small>CURATED STARTING POINTS</small><h2>Latest resources</h2><p>Sample links for the prototype.</p></div><button className="plain" onClick={()=>go('Channel','Study Dock')}>Browse channels →</button></div><Cards items={shown.slice(0,6)}/></section><Foot go={go}/></div>}
-{page==='Channel'&&<div className="content"><section className="channelhero"><div><small>DIGITAL DOCK / CHANNEL</small><h1>{ch}</h1><p>{chans.find(x=>x[0]===ch)?.[1]}</p><small>✓ Original source links　 ·　 Community resource directory</small></div></section><form className="search white" onSubmit={e=>e.preventDefault()}><Search/><input value={q} onChange={e=>Q(e.target.value)} placeholder={'Search in '+ch+'...'}/><button>Search</button></form><div className="feature"><Film size={34}/><div><small>CHANNEL GUIDE</small><h3>Find and explore responsibly</h3><p>Read descriptions and continue to the original source. Check permissions before using content.</p></div><button className="outline" onClick={()=>go('Rules')}>View rules</button></div><div className="filters">{['All',...new Set(items.filter(x=>x.channel===ch&&x.status==='approved').map(x=>x.category))].map(x=><button className={f===x?'sel':''} onClick={()=>F(x)}>{x}</button>)}<button className="submitmini" onClick={()=>{S({...form,channel:ch});go('Submit')}}>+ Submit resource</button></div><div className="heading"><div><h2>Explore resources</h2><p>{shown.length} approved sample resource(s)</p></div></div><Cards items={shown}/><Foot go={go}/></div>}
-{page==='Submit'&&<div className="content"><div className="intro"><small>COMMUNITY CONTRIBUTION</small><h1>Submit a resource</h1><p>Help the community by sharing a useful resource and its original source.</p></div><div className="formgrid"><form className="panel submitform" onSubmit={submit}><label>Select channel<select value={form.channel} onChange={e=>S({...form,channel:e.target.value})}>{chans.map(x=><option>{x[0]}</option>)}</select></label><label>Resource title<input required minLength="2" value={form.title} onChange={e=>S({...form,title:e.target.value})} placeholder="e.g. Official documentation"/></label><label>Resource URL<input required type="url" value={form.url} onChange={e=>S({...form,url:e.target.value})} placeholder="https://example.org"/></label><label>Description<textarea required minLength="10" value={form.desc} onChange={e=>S({...form,desc:e.target.value})} rows="4" placeholder="What is this resource useful for?"/></label><p className="privacy"><ShieldCheck size={17}/> Submissions remain pending in this demo until approved. Do not enter private information.</p><button className="submitbutton"><PlusCircle size={17}/> Submit for review</button></form><aside className="panel"><h3>Submission guidelines</h3><ul><li>Prefer official or original sources.</li><li>Share lawful or openly licensed resources.</li><li>Check that the link is relevant and works.</li><li>Never submit private data or suspicious links.</li><li>Submissions are reviewed before publication.</li></ul><p className="muted">Demo note: real automated safety checks are not connected.</p></aside></div><Foot go={go}/></div>}
-{page==='Admin'&&<div className="content"><div className="intro"><small>DEMO WORKFLOW</small><h1>Admin moderation</h1><p>Review submissions and try approval or rejection.</p></div><div className="stats"><div>Pending review <b>{items.filter(x=>x.status==='pending').length}</b></div><div>Approved <b>{items.filter(x=>x.status==='approved').length}</b></div><div>Rejected <b>{items.filter(x=>x.status==='rejected').length}</b></div></div><div className="panel"><div className="adminbar"><input placeholder="Search submissions..." onChange={e=>Q(e.target.value)}/><select value={admin} onChange={e=>A(e.target.value)}><option value="pending">Pending submissions</option><option value="approved">Approved links</option><option value="rejected">Rejected links</option><option value="all">All submissions</option></select></div><div className="tablewrap"><table><thead><tr><th>Resource</th><th>Channel</th><th>Domain</th><th>Status</th><th>Actions</th></tr></thead><tbody>{items.filter(x=>(admin==='all'||x.status===admin)&&(`${x.title} ${x.url}`).toLowerCase().includes(q.toLowerCase())).map(x=><tr><td><b>{x.title}</b><small>{x.desc}</small></td><td>{x.channel}</td><td>{(()=>{try{return new URL(x.url).hostname}catch{return '—'}})()}</td><td><span className={'badge '+x.status}>{x.status}</span></td><td><button className="approve" disabled={x.status==='approved'} onClick={()=>decide(x.id,'approved')}><Check size={15}/></button> <button className="reject" disabled={x.status==='rejected'} onClick={()=>decide(x.id,'rejected')}><X size={15}/></button></td></tr>)}</tbody></table></div><p className="warning">⚠ This is a local demo dashboard, not secure admin access. No authentication, database or server-side domain safety checks are connected.</p></div><Foot go={go}/></div>}
-{['About','Rules','Contact'].includes(page)&&<div className="content"><div className="intro"><small>DIGITAL DOCK</small><h1>{page==='About'?'About Digital Dock':page==='Rules'?'Community rules':'Contact'}</h1><p>{page==='About'?'A central hub for discovering digital resources.':page==='Rules'?'Discover and share resources responsibly.':'Help improve the Digital Dock concept.'}</p></div><div className="panel info">{page==='About'?'Digital Dock organizes useful resources into Movie Dock, Study Dock and Game Dock. It links to original sources rather than hosting third-party files.':page==='Rules'?'Share lawful, authorized or openly licensed resources. Prefer official sources, provide accurate descriptions, avoid suspicious links and never submit confidential information.':'This academic prototype has no connected contact service yet. Record feedback during peer review and include it in the assignment report.'}<p><button onClick={()=>go('Home')}>Back to home →</button></p></div><Foot go={go}/></div>}</main></div>}
-function Cards({items}){return <div className="cards">{items.length?items.map((x,i)=><article className="resource"><div className={'art art'+i%3}>{x.channel==='Study Dock'?<BookOpen size={32}/>:x.channel==='Game Dock'?<Gamepad2 size={32}/>:<Film size={32}/>}<small>{x.channel}</small></div><div className="resbody"><small>{x.category}</small><h3>{x.title}</h3><p>{x.desc}</p><div className="resfoot"><span>{new URL(x.url).hostname}</span><a href={x.url} target="_blank" rel="noreferrer">Open link <ExternalLink size={13}/></a></div></div></article>):<div className="empty">No resources found. Try another search or category.</div>}</div>}
-function Foot({go}){return <footer><b><Anchor size={16}/> Digital Dock</b><span>Discover responsibly.</span><div><button onClick={()=>go('About')}>About</button><button onClick={()=>go('Rules')}>Rules</button><button onClick={()=>go('Contact')}>Contact</button></div><small>Academic prototype · Sample resources · Not a production service</small></footer>}createRoot(document.getElementById('root')).render(<App/>);
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import './style.css';
+
+// Components
+import { Header } from './components/Header.jsx';
+import { Sidebar } from './components/Sidebar.jsx';
+import { Footer } from './components/Footer.jsx';
+import { NotificationBanner } from './components/NotificationBanner.jsx';
+
+// Pages
+import { HomePage } from './pages/HomePage.jsx';
+import { ChannelPage } from './pages/ChannelPage.jsx';
+import { SubmitPage } from './pages/SubmitPage.jsx';
+import { AdminPage } from './pages/AdminPage.jsx';
+import { AboutPage } from './pages/AboutPage.jsx';
+import { RulesPage } from './pages/RulesPage.jsx';
+import { ContactPage } from './pages/ContactPage.jsx';
+
+// Utilities & Data
+import { loadResources, saveResources, resetResourcesToDefault } from './utils/storage.js';
+import { extractHostname } from './utils/url.js';
+
+export function App() {
+  const [page, setPage] = useState('Home');
+  const [currentChannel, setCurrentChannel] = useState('Movie Dock');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [resources, setResources] = useState(() => loadResources());
+  const [notification, setNotification] = useState(null);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [lastAction, setLastAction] = useState(null);
+
+  // Sync resources to session storage whenever they change
+  useEffect(() => {
+    saveResources(resources);
+  }, [resources]);
+
+  // Navigation handler
+  const handleNavigate = (targetPage, channel) => {
+    setPage(targetPage);
+    if (channel) {
+      setCurrentChannel(channel);
+    }
+    // Reset page-level category filter when navigating
+    setActiveCategory('All');
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Start submission pre-configured for a channel
+  const handleStartSubmitForChannel = (channel) => {
+    setCurrentChannel(channel);
+    setPage('Submit');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Resource submission handler
+  const handleSubmitResource = (resourceData) => {
+    const newEntry = {
+      ...resourceData,
+      id: Date.now(),
+      domain: extractHostname(resourceData.url),
+      status: 'pending',
+      submittedAt: new Date().toISOString()
+    };
+
+    const updatedList = [newEntry, ...resources];
+    setResources(updatedList);
+    setNotification({
+      type: 'success',
+      message: `"${resourceData.title}" submitted to the demo queue. Visit the Admin Dashboard to review and approve it!`
+    });
+  };
+
+  // Moderation status update handler with undo tracking
+  const handleUpdateStatus = (id, newStatus) => {
+    const targetItem = resources.find((item) => item.id === id);
+    if (!targetItem) return;
+
+    const previousStatus = targetItem.status;
+    const updatedList = resources.map((item) =>
+      item.id === id ? { ...item, status: newStatus } : item
+    );
+
+    setResources(updatedList);
+    setLastAction({ id, previousStatus, newStatus, title: targetItem.title });
+
+    setNotification({
+      type: newStatus === 'approved' ? 'success' : 'warning',
+      message: `Status of "${targetItem.title}" changed to ${newStatus}.`
+    });
+  };
+
+  // Undo last moderation action
+  const handleUndo = () => {
+    if (!lastAction) return;
+    const { id, previousStatus, title } = lastAction;
+    const updatedList = resources.map((item) =>
+      item.id === id ? { ...item, status: previousStatus } : item
+    );
+    setResources(updatedList);
+    setLastAction(null);
+    setNotification({
+      type: 'info',
+      message: `Undid change for "${title}". Restored to ${previousStatus}.`
+    });
+  };
+
+  // Reset to initial sample dataset
+  const handleResetData = () => {
+    const defaultData = resetResourcesToDefault();
+    setResources(defaultData);
+    setLastAction(null);
+    setNotification({
+      type: 'info',
+      message: 'Demo dataset reset to initial sample state.'
+    });
+  };
+
+  return (
+    <div className="app-container">
+      {/* Navigation Sidebar */}
+      <Sidebar
+        page={page}
+        currentChannel={currentChannel}
+        onNavigate={handleNavigate}
+        isMobileOpen={isMobileOpen}
+        onCloseMobile={() => setIsMobileOpen(false)}
+      />
+
+      {/* Main View Area */}
+      <div className="main-area">
+        <Header
+          page={page}
+          currentChannel={currentChannel}
+          isMobileOpen={isMobileOpen}
+          onToggleMobileNav={() => setIsMobileOpen((prev) => !prev)}
+        />
+
+        {/* Global Notification Banner */}
+        {notification && (
+          <div style={{ position: 'relative' }}>
+            <NotificationBanner
+              notice={notification}
+              onDismiss={() => setNotification(null)}
+            />
+            {lastAction && (
+              <div className="undo-action-wrapper">
+                <button
+                  type="button"
+                  className="section-link-btn"
+                  style={{ fontSize: 'var(--font-size-xs)' }}
+                  onClick={handleUndo}
+                >
+                  ↺ Undo status change for "{lastAction.title}"
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Dynamic Pages */}
+        <main id="main-content">
+          {page === 'Home' && (
+            <HomePage
+              resources={resources}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onSearchSubmit={() => {
+                const section = document.getElementById('resources-heading');
+                if (section) {
+                  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              onSearchClear={() => setSearchQuery('')}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {page === 'Channel' && (
+            <ChannelPage
+              channelName={currentChannel}
+              resources={resources}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onSearchClear={() => setSearchQuery('')}
+              activeCategory={activeCategory}
+              onSelectCategory={setActiveCategory}
+              onNavigate={handleNavigate}
+              onStartSubmitForChannel={handleStartSubmitForChannel}
+            />
+          )}
+
+          {page === 'Submit' && (
+            <SubmitPage
+              initialChannel={currentChannel}
+              onSubmitResource={handleSubmitResource}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {page === 'Admin' && (
+            <AdminPage
+              resources={resources}
+              onUpdateStatus={handleUpdateStatus}
+              onResetData={handleResetData}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {page === 'About' && <AboutPage onNavigate={handleNavigate} />}
+          {page === 'Rules' && <RulesPage onNavigate={handleNavigate} />}
+          {page === 'Contact' && <ContactPage onNavigate={handleNavigate} />}
+        </main>
+
+        <Footer onNavigate={handleNavigate} />
+      </div>
+    </div>
+  );
+}
+
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  createRoot(rootElement).render(<App />);
+}
